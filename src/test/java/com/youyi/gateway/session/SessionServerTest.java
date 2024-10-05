@@ -23,21 +23,18 @@ public class SessionServerTest {
 
     @Test
     public void test_sessionServer() throws ExecutionException, InterruptedException {
-        SessionServer sessionServer = new SessionServer();
-        Future<Channel> future = Executors.newFixedThreadPool(2).submit(sessionServer);
+        Configuration configuration = new Configuration();
+        configuration.addGenericReference(
+                "api-gateway-test",
+                "com.youyi.gateway.api.TestService",
+                "sayHi"
+        );
 
-        Channel channel = future.get();
-        if (Objects.isNull(channel)) {
-            LOGGER.error("netty server start error, channel is null");
-            return;
-        }
+        GenericReferenceSessionFactoryBuilder builder = new GenericReferenceSessionFactoryBuilder();
+        Future<Channel> future = builder.build(configuration);
 
-        while (!channel.isActive()) {
-            LOGGER.info("waiting for netty server start...");
-            Thread.sleep(500);
-        }
+        LOGGER.info("\uD83D\uDE80\uD83D\uDE80\uD83D\uDE80[API-Gateway] start done {}", future.get().id());
 
-        LOGGER.info("netty server start success.");
         Thread.sleep(Long.MAX_VALUE);
     }
 }

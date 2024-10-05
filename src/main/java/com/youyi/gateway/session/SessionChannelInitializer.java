@@ -13,12 +13,18 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
  * @date 2024/10/04
  */
 public class SessionChannelInitializer extends ChannelInitializer<SocketChannel> {
+    private final Configuration configuration;
+
+    public SessionChannelInitializer(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     protected void initChannel(SocketChannel channel) throws Exception {
         channel.pipeline()
                 .addLast(new HttpRequestDecoder())
                 .addLast(new HttpResponseEncoder())
                 .addLast(new HttpObjectAggregator(1024 * 1024))
-                .addLast(new SessionServerHandler());
+                .addLast(new SessionServerHandler(configuration));
     }
 }
