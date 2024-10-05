@@ -1,6 +1,7 @@
-package com.youyi.gateway.session;
+package com.youyi.gateway.socket;
 
-import com.youyi.gateway.session.handler.SessionServerHandler;
+import com.youyi.gateway.session.GatewaySessionFactory;
+import com.youyi.gateway.socket.handler.GatewayServerHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -10,13 +11,13 @@ import io.netty.handler.codec.http.HttpResponseEncoder;
 /**
  * 会话初始化器
  * @author yoyocraft
- * @date 2024/10/04
+ * @date 2024/10/05
  */
-public class SessionChannelInitializer extends ChannelInitializer<SocketChannel> {
-    private final Configuration configuration;
+public class GatewayChannelInitializer extends ChannelInitializer<SocketChannel> {
+    private final GatewaySessionFactory gatewaySessionFactory;
 
-    public SessionChannelInitializer(Configuration configuration) {
-        this.configuration = configuration;
+    public GatewayChannelInitializer(GatewaySessionFactory gatewaySessionFactory) {
+        this.gatewaySessionFactory = gatewaySessionFactory;
     }
 
     @Override
@@ -25,6 +26,6 @@ public class SessionChannelInitializer extends ChannelInitializer<SocketChannel>
                 .addLast(new HttpRequestDecoder())
                 .addLast(new HttpResponseEncoder())
                 .addLast(new HttpObjectAggregator(1024 * 1024))
-                .addLast(new SessionServerHandler(configuration));
+                .addLast(new GatewayServerHandler(gatewaySessionFactory));
     }
 }

@@ -1,7 +1,7 @@
-package com.youyi.gateway.bind;
+package com.youyi.gateway.session;
 
-import com.google.common.collect.Maps;
-import com.youyi.gateway.session.Configuration;
+import com.youyi.gateway.bind.GenericReference;
+import com.youyi.gateway.mapping.HttpStatement;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
@@ -9,33 +9,39 @@ import org.apache.dubbo.config.bootstrap.DubboBootstrap;
 import org.apache.dubbo.config.utils.ReferenceConfigCache;
 import org.apache.dubbo.rpc.service.GenericService;
 
-import java.util.Map;
-import java.util.Objects;
-
 /**
- * 泛化调用注册器
+ * 默认网关会话
  * @author yoyocraft
- * @date 2024/10/04
+ * @date 2024/10/05
  */
-public class GenericReferenceRegistry {
-
-    private static final Map<String /* methodName */, GenericReferenceProxyFactory> KNOWN_GENERIC_REFS = Maps.newConcurrentMap();
-
+public class DefaultGatewaySession implements GatewaySession {
     private final Configuration configuration;
 
-    public GenericReferenceRegistry(Configuration configuration) {
+    public DefaultGatewaySession(Configuration configuration) {
         this.configuration = configuration;
     }
 
-    public GenericReference getGenericReference(String methodName) {
-        GenericReferenceProxyFactory proxyFactory = KNOWN_GENERIC_REFS.get(methodName);
-        if (Objects.isNull(proxyFactory)) {
-            throw new RuntimeException("Type " + methodName + " is not known to the GenericReferenceRegistry");
-        }
-        return proxyFactory.newInstance(methodName);
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
-    public void addGenericReference(String applicationName, String interfaceName, String methodName) {
+    @Override
+    public GenericReference getMapper(String uri) {
+        return configuration.getMapper(uri, this);
+    }
+
+    /**
+     * TODO 后续拆分到执行器中去执行
+     */
+    @Override
+    public Object get(String uri, Object args) {
+
+        // 获取配置
+        HttpStatement httpStatement = configuration.getHttpStatement(uri);
+        String applicationName = httpStatement.getApplicationName();
+        String interfaceName = httpStatement.getInterfaceName();
+
         // 获取基础服务（创建成本高，内存获取）
         ApplicationConfig applicationConfig = configuration.getApplicationConfig(applicationName);
         RegistryConfig registryConfig = configuration.getRegistryConfig(applicationName);
@@ -51,8 +57,7 @@ public class GenericReferenceRegistry {
 
         // 获取泛化调用服务
         GenericService genericService = ReferenceConfigCache.getCache().get(referenceConfig);
-
-        // 创建并保存泛化服务工厂
-        KNOWN_GENERIC_REFS.put(methodName, new GenericReferenceProxyFactory(genericService));
+        // FIXME 先写死
+        return genericService.$invoke(httpStatement.getMethodName(), new String[]{"java.lang.String"}, new Object[]{"游艺"});
     }
 }

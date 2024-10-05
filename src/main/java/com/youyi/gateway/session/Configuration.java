@@ -2,7 +2,8 @@ package com.youyi.gateway.session;
 
 import com.google.common.collect.Maps;
 import com.youyi.gateway.bind.GenericReference;
-import com.youyi.gateway.bind.GenericReferenceRegistry;
+import com.youyi.gateway.bind.MapperRegistry;
+import com.youyi.gateway.mapping.HttpStatement;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
@@ -20,11 +21,12 @@ public class Configuration {
     private static final Map<String /* appName */, ApplicationConfig> APPLICATION_CONFIG_CACHE = Maps.newHashMap();
     private static final Map<String /* appName */, RegistryConfig> REGISTRY_CONFIG_CACHE = Maps.newHashMap();
     private static final Map<String /* interfaceName */, ReferenceConfig<GenericService>> REFERENCE_CONFIG_CACHE = Maps.newHashMap();
+    private static final Map<String /* uri */, HttpStatement> HTTP_STATEMENT_CACHE = Maps.newHashMap();
 
-    private final GenericReferenceRegistry referenceRegistry;
+    private final MapperRegistry mapperRegistry;
 
     public Configuration() {
-        referenceRegistry = new GenericReferenceRegistry(this);
+        mapperRegistry = new MapperRegistry(this);
 
         // TODO youyi 2024/10/5 从配置文件中获取
         final String applicationName = "api-gateway-test";
@@ -59,11 +61,19 @@ public class Configuration {
         return REFERENCE_CONFIG_CACHE.get(interfaceName);
     }
 
-    public void addGenericReference(String applicationName, String interfaceName, String methodName) {
-        referenceRegistry.addGenericReference(applicationName, interfaceName, methodName);
+    public void addHttpStatement(HttpStatement httpStatement) {
+        HTTP_STATEMENT_CACHE.put(httpStatement.getUri(), httpStatement);
     }
 
-    public GenericReference getGenericReference(String methodName) {
-        return referenceRegistry.getGenericReference(methodName);
+    public HttpStatement getHttpStatement(String uri) {
+        return HTTP_STATEMENT_CACHE.get(uri);
+    }
+
+    public void addMapper(HttpStatement httpStatement) {
+        mapperRegistry.addMapper(httpStatement);
+    }
+
+    public GenericReference getMapper(String uri, GatewaySession session) {
+        return mapperRegistry.getMapper(uri, session);
     }
 }

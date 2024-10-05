@@ -1,5 +1,6 @@
-package com.youyi.gateway.session;
+package com.youyi.gateway.socket;
 
+import com.youyi.gateway.session.GatewaySessionFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -17,20 +18,20 @@ import java.util.concurrent.Callable;
 /**
  * 网关会话服务
  * @author yoyocraft
- * @date 2024/10/04
+ * @date 2024/10/05
  */
-public class SessionServer implements Callable<Channel> {
+public class GatewaySocketServer implements Callable<Channel> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewaySocketServer.class);
 
     private final EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     private final EventLoopGroup workerGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors());
 
-    private final Configuration configuration;
+    private final GatewaySessionFactory gatewaySessionFactory;
     private Channel channel;
 
-    public SessionServer(Configuration configuration) {
-        this.configuration = configuration;
+    public GatewaySocketServer(GatewaySessionFactory gatewaySessionFactory) {
+        this.gatewaySessionFactory = gatewaySessionFactory;
     }
 
     @Override
@@ -41,7 +42,7 @@ public class SessionServer implements Callable<Channel> {
             bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 128)
-                    .childHandler(new SessionChannelInitializer(configuration));
+                    .childHandler(new GatewayChannelInitializer(gatewaySessionFactory));
 
             channelFuture = bootstrap.bind(new InetSocketAddress(7397)).syncUninterruptibly();
             this.channel = channelFuture.channel();

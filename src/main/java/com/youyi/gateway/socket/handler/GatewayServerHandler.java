@@ -1,9 +1,11 @@
-package com.youyi.gateway.session.handler;
+package com.youyi.gateway.socket.handler;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.youyi.gateway.bind.GenericReference;
-import com.youyi.gateway.session.Configuration;
+import com.youyi.gateway.session.GatewaySession;
+import com.youyi.gateway.session.GatewaySessionFactory;
+import com.youyi.gateway.socket.BaseHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -18,16 +20,16 @@ import org.slf4j.LoggerFactory;
 /**
  * 会话服务处理器
  * @author yoyocraft
- * @date 2024/10/04
+ * @date 2024/10/05
  */
-public class SessionServerHandler extends BaseHandler<FullHttpRequest> {
+public class GatewayServerHandler extends BaseHandler<FullHttpRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionServerHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayServerHandler.class);
 
-    private final Configuration configuration;
+    private final GatewaySessionFactory gatewaySessionFactory;
 
-    public SessionServerHandler(Configuration configuration) {
-        this.configuration = configuration;
+    public GatewayServerHandler(GatewaySessionFactory gatewaySessionFactory) {
+        this.gatewaySessionFactory = gatewaySessionFactory;
     }
 
     @Override
@@ -35,8 +37,8 @@ public class SessionServerHandler extends BaseHandler<FullHttpRequest> {
         LOGGER.info("gateway receive request, uri: {}, method: {}", req.uri(), req.method());
 
         // 过滤掉 favicon.ico 请求
-        String methodName = req.uri().substring(1);
-        if ("favicon.ico".equals(methodName)) {
+        String uri = req.uri();
+        if ("/favicon.ico".equals(uri)) {
             return;
         }
 
@@ -44,10 +46,10 @@ public class SessionServerHandler extends BaseHandler<FullHttpRequest> {
         DefaultFullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
 
         // 泛化服务调用
-        // FIXME 先写死 sayHi
-        GenericReference genericReference = configuration.getGenericReference("sayHi");
+        GatewaySession gatewaySession = gatewaySessionFactory.openSession();
+        GenericReference genericReference = gatewaySession.getMapper(uri);
+        // FIXME 先写死
         String ret = genericReference.$invoke("yoyocraft");
-        ret += " " + System.currentTimeMillis();
 
         // 控制返回信息
         resp.content().writeBytes(JSON.toJSONBytes(ret, JSONWriter.Feature.PrettyFormat));

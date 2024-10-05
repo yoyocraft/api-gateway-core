@@ -1,4 +1,4 @@
-package com.youyi.gateway.session.handler;
+package com.youyi.gateway.socket;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
