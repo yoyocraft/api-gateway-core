@@ -1,4 +1,4 @@
-package com.youyi.gateway.session;
+package com.youyi.gateway.session.factory;
 
 import io.netty.channel.Channel;
 

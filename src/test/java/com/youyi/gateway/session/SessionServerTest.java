@@ -1,5 +1,6 @@
 package com.youyi.gateway.session;
 
+import com.youyi.gateway.session.factory.GenericReferenceSessionFactoryBuilder;
 import io.netty.channel.Channel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,9 +8,7 @@ import org.junit.runners.JUnit4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**

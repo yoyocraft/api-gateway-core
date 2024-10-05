@@ -1,5 +1,6 @@
-package com.youyi.gateway.session;
+package com.youyi.gateway.session.factory;
 
+import com.youyi.gateway.session.Configuration;
 import io.netty.channel.Channel;
 
 import java.util.concurrent.Future;

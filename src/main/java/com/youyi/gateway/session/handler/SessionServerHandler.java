@@ -3,7 +3,6 @@ package com.youyi.gateway.session.handler;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.youyi.gateway.bind.GenericReference;
-import com.youyi.gateway.session.BaseHandler;
 import com.youyi.gateway.session.Configuration;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
