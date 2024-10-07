@@ -46,8 +46,8 @@ public class GatewayServerHandler extends BaseHandler<FullHttpRequest> {
         DefaultFullHttpResponse resp = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
 
         // 泛化服务调用
-        GatewaySession gatewaySession = gatewaySessionFactory.openSession();
-        GenericReference genericReference = gatewaySession.getMapper(uri);
+        GatewaySession gatewaySession = gatewaySessionFactory.openSession(uri);
+        GenericReference genericReference = gatewaySession.getMapper();
         // FIXME 先写死
         String ret = genericReference.$invoke("yoyocraft");
 

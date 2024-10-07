@@ -10,11 +10,11 @@ import com.youyi.gateway.session.GatewaySession;
  * @date 2024/10/05
  */
 public class MapperMethod {
-    private final String uri;
+    private final String methodName;
     private final HttpCmdType httpCmdType;
 
     public MapperMethod(String uri, Configuration configuration) {
-        this.uri = uri;
+        this.methodName = configuration.getHttpStatement(uri).getMethodName();
         this.httpCmdType = configuration.getHttpStatement(uri).getHttpCmdType();
     }
 
@@ -22,7 +22,7 @@ public class MapperMethod {
         Object ret = null;
         switch (httpCmdType) {
             case GET:
-                ret = session.get(uri, args);
+                ret = session.get(methodName, args);
                 break;
             // TODO youyi 2024/10/5 后续支持更多的 HTTP 方式
             case POST:

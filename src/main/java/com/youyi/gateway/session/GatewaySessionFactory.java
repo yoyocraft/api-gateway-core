@@ -7,5 +7,5 @@ package com.youyi.gateway.session;
  */
 public interface GatewaySessionFactory {
 
-    GatewaySession openSession() throws Exception;
+    GatewaySession openSession(String uri) throws Exception;
 }

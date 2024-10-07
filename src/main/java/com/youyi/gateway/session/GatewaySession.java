@@ -11,10 +11,10 @@ public interface GatewaySession {
 
     Configuration getConfiguration();
 
-    GenericReference getMapper(String uri);
+    GenericReference getMapper();
 
     /**
      * {@link com.youyi.gateway.mapping.HttpCmdType#GET}
      */
-    Object get(String uri, Object args);
+    Object get(String methodName, Object args);
 }

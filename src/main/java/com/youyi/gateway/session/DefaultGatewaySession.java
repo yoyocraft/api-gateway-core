@@ -1,6 +1,8 @@
 package com.youyi.gateway.session;
 
 import com.youyi.gateway.bind.GenericReference;
+import com.youyi.gateway.datasource.Connection;
+import com.youyi.gateway.datasource.DataSource;
 import com.youyi.gateway.mapping.HttpStatement;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ReferenceConfig;
@@ -16,9 +18,13 @@ import org.apache.dubbo.rpc.service.GenericService;
  */
 public class DefaultGatewaySession implements GatewaySession {
     private final Configuration configuration;
+    private final String uri;
+    private final DataSource dataSource;
 
-    public DefaultGatewaySession(Configuration configuration) {
+    public DefaultGatewaySession(Configuration configuration, String uri, DataSource dataSource) {
         this.configuration = configuration;
+        this.uri = uri;
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -27,37 +33,14 @@ public class DefaultGatewaySession implements GatewaySession {
     }
 
     @Override
-    public GenericReference getMapper(String uri) {
+    public GenericReference getMapper() {
         return configuration.getMapper(uri, this);
     }
 
-    /**
-     * TODO 后续拆分到执行器中去执行
-     */
     @Override
-    public Object get(String uri, Object args) {
-
-        // 获取配置
-        HttpStatement httpStatement = configuration.getHttpStatement(uri);
-        String applicationName = httpStatement.getApplicationName();
-        String interfaceName = httpStatement.getInterfaceName();
-
-        // 获取基础服务（创建成本高，内存获取）
-        ApplicationConfig applicationConfig = configuration.getApplicationConfig(applicationName);
-        RegistryConfig registryConfig = configuration.getRegistryConfig(applicationName);
-        ReferenceConfig<GenericService> referenceConfig = configuration.getReferenceConfig(interfaceName);
-
-        // 构建 Dubbo 服务
-        DubboBootstrap bootstrap = DubboBootstrap.getInstance();
-        bootstrap
-                .application(applicationConfig)
-                .registry(registryConfig)
-                .reference(referenceConfig)
-                .start();
-
-        // 获取泛化调用服务
-        GenericService genericService = ReferenceConfigCache.getCache().get(referenceConfig);
+    public Object get(String methodName, Object args) {
+        Connection connection = dataSource.getConnection();
         // FIXME 先写死
-        return genericService.$invoke(httpStatement.getMethodName(), new String[]{"java.lang.String"}, new Object[]{"游艺"});
+        return connection.execute(methodName, new String[]{"java.lang.String"}, new String[]{"name"}, new Object[]{args});
     }
 }
